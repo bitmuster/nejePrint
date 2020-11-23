@@ -3,6 +3,10 @@ import serial
 import time
 import sys
 import struct
+import math
+
+# http://python-pillow.github.io/
+from PIL import Image
 
 # install pyserial: https://pyserial.readthedocs.io/en/latest/pyserial.html
 
@@ -42,12 +46,14 @@ exp_b = b'\xff\r\x00d\xff\x10\x01\x00'
 
 if len(rep) != 20:
     print('Oh')
+    print('Device responded with', rep)
     sys.exit(1)
 
 if rep.startswith(exp_a) and rep.endswith(exp_b):
     pass
 else:
     print('Ooh')
+    print('Device responded with', rep)
     sys.exit(1)
 
 
@@ -125,7 +131,6 @@ def rectangle_10x10():
     else:
         print('Aah')
         sys.exit(1)
-
 
     #write
     #ff c0 ff c0 ff c0 ff c0 ff c0 ff c0 ff c0 ff c0 ff c0 ff c0
@@ -230,9 +235,103 @@ def mini_skull():
     data = bytes.fromhex(skull)
     ser.write(data)
 
+def image():
+
+    print('Write dimensions')
+    time.sleep(d)
+
+    im = Image.open('./test_50x50.bmp')
+
+    #im = im.resize((512,512), Image.NEAREST)
+    #im = im.convert('1') #.transpose(Image.FLIP_TOP_BOTTOM)
+    #print(im.tobytes())
+    u = im.tobytes()
+
+    # the binary image:
+    for i in range(len(u)):
+        print(u[i], end='')
+        if ((i+1)% 50) ==0:
+            print('')
+
+    print(im)
+
+    #width = b'\x00\x10'  # bit width
+
+    iw = 50 # intentional width
+    ih = 50 # intentional height
+
+    if (iw % 8) ==0:
+        w = iw//8
+    else:
+        w = iw//8+1
+
+    print('w', w)
+    assert w == 7
+
+    padbits = w*8 - iw
+    print('padbits', padbits)
+
+    rows=[]
+    data = b''
+    val = 0
+    for i in range(len(u)):
+        print(u[i], end='')
+        val = val << 1
+        val += u[i]
+        if ((i+1)% iw) ==0:
+            val << padbits;
+            print('    ', end='')
+            print(f'{val:014x}') # 14 char width
+            rows.append(val)
+            print(hex(val))
+            data += bytes.fromhex(f'{val:014x}')
+            val=0
+
+    print(rows)
+    print(data)
+    print(len(data))
+
+    assert len(data) == math.ceil(iw/8)*ih
+
+    #sys.exit()
+
+    width = height = struct.pack('>h', w*8) # should be a multiple of 8
+
+    #height = b'\x00\x0a' # 10 lines
+    height = struct.pack('>h', 50)
+
+    dim = DIMENSIONS_T + width + height
+    print(dim)
+    ser.write(dim)
+
+    print('Write DO IT')
+    time.sleep(d)
+    ser.write(DOIT)
+
+    print("Read and hope for ACK")
+    rep=ser.read(10);
+    #print(rep)
+
+    #read ack
+
+    if len(rep) != 4:
+        print('Ah')
+        sys.exit(1)
+
+    if rep == ACK:
+        pass
+    else:
+        print('Aah')
+        sys.exit(1)
+
+    print('Write data')
+    time.sleep(d)
+    ser.write(data)
+
 
 #rectangle_10x10()
-mini_skull()
+#mini_skull()
+image()
 
 
 
