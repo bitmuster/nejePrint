@@ -35,13 +35,6 @@ def init(ser):
     print("Read 20")
     rep=ser.read(20);
     print('Read ', len(rep), ' bytes')
-    #print('Read:   ', rep)
-
-    # the 11th bit is the intensity
-    exp = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00\x0b\xff\r\x00d\xff\x10\x01\x00'
-    #print('Expected', exp)
-    exp2 = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x002\xff\r\x00d\xff\x10\x01\x00'
-    exp3 = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00\x10\xff\r\x00d\xff\x10\x01\x00'
 
     exp_a = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00'
     exp_b = b'\xff\r\x00d\xff\x10\x01\x00'
@@ -58,43 +51,19 @@ def init(ser):
         print('Device responded with', rep)
         sys.exit(1)
 
-
-    # reads
-    # b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n'
-    # b'\x00\x0b\xff\r\x00d\xff\x10\x01\x00'
-    # b'\xff\x05\x01\x01'
-
-    # reads
-    # b'\xff\x01\x00\x00
-    #   \xff\x02\x0b\x02
-    #   \xffx00\x0b
-    #   \xff\r\x00d
-    #   \xff\x10\x01\x00'
-    # b'\xff\x05\x01\x01'
-
-
-    #write
-    #ff 05 0b 00
-
     print('intensity')
     time.sleep(d)
-
-    #intensity = b'\xff\x05\x0b\x00' #11ms
-    #intensity = b'\xff\x05\x32\x00' #50ms
-    #intensity = b'\xff\x05\x14\x00' #20ms
-    #intensity = b'\xff\x05\x10\x00' #16ms
 
     # 50: white paper engrave
     # 20: not so white paper engrave
     # 5-10: engrave light balsa wood
 
     burn_time = 5
+
+    # Todo Will not work for times larger than 0xff!
     intensity = b'\xff\x05' + struct.pack('b', burn_time) + b'\x00' #20ms
 
     ser.write(intensity)
-
-    #write
-    #ff 6e 01 02 28 02 28 ff 6e 02 00 10 00 0a ff 06 01 01
 
     print('Write whatever')
     time.sleep(d)
@@ -179,13 +148,9 @@ def image(ser):
             data += bytes.fromhex(f'{val:032x}') # for 245px
             val=0
 
-    #print(rows)
-    #print(data)
     print('Data Length: ', len(data))
 
     assert len(data) == math.ceil(iw/8)*ih
-
-    #sys.exit()
 
     width = height = struct.pack('>h', w*8) # should be a multiple of 8
 
@@ -202,9 +167,6 @@ def image(ser):
 
     print("Read and hope for ACK")
     rep=ser.read(10);
-    #print(rep)
-
-    #read ack
 
     if len(rep) != 4:
         print('Ah')
