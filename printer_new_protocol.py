@@ -19,22 +19,23 @@ DIMENSIONS_T = b'\xff\x6e\x02'
 
 d = 0.1 # slow down to observe
 
+debug = False
+
 def init_serial():
     ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1.0)
     return ser
 
 def init(ser, burn_time):
 
-    print("Read buffer emtty")
+    print("Read buffer")
     rep=ser.read(30);
-    print(rep)
+    #print(rep)
 
-    print("Say hello")
+    print("Say hello to printer")
     ser.write(HELLO)
 
-    print("Read 20")
     rep=ser.read(20);
-    print('Read ', len(rep), ' bytes')
+    #print('Read', len(rep), 'bytes')
 
     exp_a = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00'
     exp_b = b'\xff\r\x00d\xff\x10\x01\x00'
@@ -51,7 +52,7 @@ def init(ser, burn_time):
         print('Device responded with', rep)
         sys.exit(1)
 
-    print('intensity')
+    print('Write intensity')
     time.sleep(d)
 
     # Todo Will not work for times larger than 0xff!
@@ -59,7 +60,7 @@ def init(ser, burn_time):
 
     ser.write(intensity)
 
-    print('Write whatever')
+    print('Write \'whatever\'')
     time.sleep(d)
     ser.write(WHATEVER)
 
@@ -88,13 +89,14 @@ def image(ser, filename):
         u = u.replace(b'\x01',b'\x00')
         u = u.replace(b'\x02',b'\x01')
 
-    # the binary image:
-    for i in range(len(u)):
-        print(u[i], end='')
-        if ((i+1)% iw) ==0:
-            print('')
+    if debug:
+        # the binary image:
+        for i in range(len(u)):
+            print(u[i], end='')
+            if ((i+1)% iw) ==0:
+                print('')
 
-    print(im)
+    #print(im)
 
     #width = b'\x00\x10'  # bit width
 
@@ -127,13 +129,15 @@ def image(ser, filename):
             val = val << padbits;
             
             rows.append(val)
-            print(hex(val))
+
+            if debug:
+                print(hex(val))
 
             s=f'{{0:{data_width}x}}'
             data += bytes.fromhex(s.format(val))
             val=0
 
-    print('Data Length: ', len(data))
+    print('Data Length is: ', len(data))
 
     assert len(data) == math.ceil(iw/8)*ih
 
@@ -143,7 +147,7 @@ def image(ser, filename):
     height = struct.pack('>h', ih)
 
     dim = DIMENSIONS_T + width + height
-    print(dim)
+    #print(dim)
     ser.write(dim)
 
     print('Write DO IT')
@@ -154,16 +158,18 @@ def image(ser, filename):
     rep=ser.read(10);
 
     if len(rep) != 4:
-        print('Ah')
+        print('Error in response length')
+        print('Device responded with', rep)
         sys.exit(1)
 
     if rep == ACK:
         pass
     else:
-        print('Aah')
+        print('Error in response')
+        print('Device responded with', rep)
         sys.exit(1)
 
-    print('Write data')
+    print('Write image data')
     time.sleep(d)
 
     ser.write(data)
