@@ -2,6 +2,7 @@
 
 
 import unittest
+import math
 from unittest.mock import patch, MagicMock, call
 
 import printer_new_protocol
@@ -64,16 +65,23 @@ class TestNewProtocol(unittest.TestCase):
 
         width = 7 # 50px -> 56 bit -> 7 byte
         height = 50
-        exp = b'\xff\x6e\x02' + b'\x00\x38\x00\x32'
+        exp = b'\xff\x6e\x02' # 0x6e = 'n'
         dim = printer_new_protocol.derive_dimensions(width, height)
-        self.assertEqual(dim, exp)
+        self.assertEqual(dim, exp + b'\x00\x38\x00\x32')
 
-         #256px     02 38 02 38
-         #255px     02 38 02 37
-         #200px     02 00 02 00
-         #180px     01 54 01 50
-         #451px     04 38 04 33
+        table = [
+            [256, b'\x02\x38\x02\x38'],  # 0x38 = '8'
+            [255, b'\x02\x38\x02\x37'],
+            [200, b'\x02\x00\x02\x00'],
+            [180, b'\x01\x54\x01\x50'], # 0x0154 : 100 + 0x54 = 100+ 84= 184
+            [451, b'\x04\x38\x04\x33']
+            ]
 
+        for entry in table:
+            w = math.ceil( entry[0] / 8)
+            h = entry[0]
+            dim = printer_new_protocol.derive_dimensions(w, h)
+            self.assertEqual(dim, exp + entry[1])
 
 
 

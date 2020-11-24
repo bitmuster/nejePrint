@@ -76,11 +76,25 @@ def init(ser, burn_time):
     ser.write(WHATEVER)
 
 def derive_dimensions(width_bytes, height):
+    # I don't want to know ho invented that algrrithm
 
-    w = struct.pack('>h', width_bytes*8) # should be a multiple of 8
+    if width_bytes*8 <= 0x80: # Threshhold unknown somewhere betweeen 0x80 and 180
+        x = 0
+        y = width_bytes*8
+        w = struct.pack('BB', x, y)
+    else:
+        x = (width_bytes*8) // 100
+        y = width_bytes*8 -x*100
+        w = struct.pack('bb', x, y)
 
-    #height = b'\x00\x0a' # 10 lines
-    h = struct.pack('>h', height)
+    if height <= 0x80: # Threshhold unknown somewhere betweeen 0x80 and 180
+        x = 0
+        y = height
+        h = struct.pack('BB', x, y)
+    else:
+        x = height // 100
+        y = height -x*100
+        h = struct.pack('bb', x, y)
 
     dim = DIMENSIONS_T + w + h
 
