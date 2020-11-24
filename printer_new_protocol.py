@@ -75,14 +75,14 @@ def init(ser, burn_time):
     time.sleep(d)
     ser.write(WHATEVER)
 
-def derive_dimensions(iw, ih):
+def derive_dimensions(width_bytes, height):
 
-    width = struct.pack('>h', iw*8) # should be a multiple of 8
+    w = struct.pack('>h', width_bytes*8) # should be a multiple of 8
 
     #height = b'\x00\x0a' # 10 lines
-    height = struct.pack('>h', ih)
+    h = struct.pack('>h', height)
 
-    dim = DIMENSIONS_T + width + height
+    dim = DIMENSIONS_T + w + h
 
     return dim
 
@@ -119,21 +119,15 @@ def image(ser, filename):
 
     #print(im)
 
-    #width = b'\x00\x10'  # bit width
+    data_width = math.ceil(iw/8)
 
-    if (iw % 8) ==0:
-        w = iw//8
-    else:
-        w = iw//8+1
+    print('Data Width', data_width)
 
-    print('Data Width', w)
-
-    padbits = w*8 - iw
+    padbits = data_width*8 - iw
 
     print('Image size:', im.size)
     print('Bits to pad: ', padbits)
-    data_width = math.ceil(iw/8)
-    assert data_width == w # same value different calculation
+    
     print('Data width: ', data_width, 'Bytes')
     print('Data width: ', data_width * 2, 'Hex-Chars')
     print('Will create blob with', data_width*ih , 'Bytes')
@@ -141,8 +135,8 @@ def image(ser, filename):
     rows=[]
     data = b''
     val = 0
-    for i in range(len(u)):
 
+    for i in range(len(u)):
         assert  u[i] == 0 or u[i] == 1
         val = val << 1
         val += u[i]
@@ -162,7 +156,7 @@ def image(ser, filename):
 
     assert len(data) == math.ceil(iw/8)*ih
 
-    dim = derive_dimensions(w, ih)
+    dim = derive_dimensions(data_width, ih)
 
     print(dim)
     ser.write(dim)
