@@ -244,6 +244,8 @@ def image():
     filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
     im = Image.open(filename)
     print('Image size:', im.size)
+    invert = True
+
 
     #im = im.resize((512,512), Image.NEAREST)
     #im = im.convert('1') #.transpose(Image.FLIP_TOP_BOTTOM)
@@ -252,6 +254,11 @@ def image():
 
     iw = im.size[0] # intentional width
     ih = im.size[1] # intentional height
+
+    if invert:
+        u = u.replace(b'\x00',b'\x02')
+        u = u.replace(b'\x01',b'\x00')
+        u = u.replace(b'\x02',b'\x01')
 
     # the binary image:
     for i in range(len(u)):
