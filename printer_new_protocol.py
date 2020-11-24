@@ -197,12 +197,14 @@ if __name__ == '__main__':
     # 50: white paper engrave
     # 20: not so white paper engrave
     # 5-10: engrave light balsa wood
-    burn_time = 5
+    burn_time = int(sys.argv[1])
 
     #filename = './test_50x50.bmp'
+    filename = sys.argv[2]
+    #filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_eroded.png'
     #filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
     #filename = 'ryanlerch-skull-and-crossbones_250px_border.png'
-    filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
+    #filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
 
     ser = init_serial()
     init(ser, burn_time)
