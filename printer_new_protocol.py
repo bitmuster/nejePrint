@@ -75,7 +75,6 @@ def image(ser, filename):
     # Seems to be the case when we read from png instead of bmp
     invert = True
 
-
     #im = im.resize((512,512), Image.NEAREST)
     #im = im.convert('1') #.transpose(Image.FLIP_TOP_BOTTOM)
     #print(im.tobytes())
@@ -120,23 +119,18 @@ def image(ser, filename):
     data = b''
     val = 0
     for i in range(len(u)):
-        #print(u[i], end='')
+
         assert  u[i] == 0 or u[i] == 1
         val = val << 1
         val += u[i]
         if ((i+1)% iw) ==0:
             val = val << padbits;
-            #print('    ', end='')
-            print(f'{val:032x}') # 14 char width
+            
             rows.append(val)
-            #print(hex(val), end='')
-            #print(len(hex(val)))
-            # width : math.ceil(v/8)*2
-            #data += bytes.fromhex(f'{val:014x}')
-            #data += bytes.fromhex(f'{val:0124x}') # for 490px
-            #data += bytes.fromhex(f'{val:062x}') # for 245px
-            #data += bytes.fromhex(f'{val:064x}')  # for 250px
-            data += bytes.fromhex(f'{val:032x}') # for 245px
+            print(hex(val))
+
+            s=f'{{0:{data_width}x}}'
+            data += bytes.fromhex(s.format(val))
             val=0
 
     print('Data Length: ', len(data))

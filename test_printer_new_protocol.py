@@ -46,3 +46,14 @@ class TestNewProtocol(unittest.TestCase):
 
         mock.write.assert_has_calls(calls)
 
+    def test_hex_conversion(self):
+
+        a = 0xc0000781f00003fffe00007c0f000018
+        ar = f'{a:032x}'
+        ae = 'c0000781f00003fffe00007c0f000018'
+        self.assertEqual(ar, ae)
+
+        w = 32
+        s=f'{{0:{w}x}}'
+        ar2 = s.format(a)
+        self.assertEqual(ar2, ae)
