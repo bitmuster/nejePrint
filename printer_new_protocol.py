@@ -10,10 +10,6 @@ from PIL import Image
 
 # install pyserial: https://pyserial.readthedocs.io/en/latest/pyserial.html
 
-ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1.0)
-
-#ser.write(b"\xF6")
-
 HELLO = b"\xff\x09\x5a\xa5"
 ACK = b'\xff\x05\x01\x01'
 DOIT = b'\xff\x06\x01\x01'
@@ -23,80 +19,85 @@ DIMENSIONS_T = b'\xff\x6e\x02'
 
 d = 0.1 # slow down to observe
 
-print("Read buffer emtty")
-rep=ser.read(30);
-print(rep)
-
-print("Say hello")
-ser.write(HELLO)
-
-print("Read 20")
-rep=ser.read(20);
-print('Read ', len(rep), ' bytes')
-#print('Read:   ', rep)
-
-# the 11th bit is the intensity
-exp = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00\x0b\xff\r\x00d\xff\x10\x01\x00'
-#print('Expected', exp)
-exp2 = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x002\xff\r\x00d\xff\x10\x01\x00'
-exp3 = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00\x10\xff\r\x00d\xff\x10\x01\x00'
-
-exp_a = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00'
-exp_b = b'\xff\r\x00d\xff\x10\x01\x00'
-
-if len(rep) != 20:
-    print('Oh')
-    print('Device responded with', rep)
-    sys.exit(1)
-
-if rep.startswith(exp_a) and rep.endswith(exp_b):
-    pass
-else:
-    print('Ooh')
-    print('Device responded with', rep)
-    sys.exit(1)
+ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1.0)
 
 
-# reads
-# b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n'
-# b'\x00\x0b\xff\r\x00d\xff\x10\x01\x00'
-# b'\xff\x05\x01\x01'
+def init():
 
-# reads
-# b'\xff\x01\x00\x00
-#   \xff\x02\x0b\x02
-#   \xffx00\x0b
-#   \xff\r\x00d
-#   \xff\x10\x01\x00'
-# b'\xff\x05\x01\x01'
+    print("Read buffer emtty")
+    rep=ser.read(30);
+    print(rep)
+
+    print("Say hello")
+    ser.write(HELLO)
+
+    print("Read 20")
+    rep=ser.read(20);
+    print('Read ', len(rep), ' bytes')
+    #print('Read:   ', rep)
+
+    # the 11th bit is the intensity
+    exp = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00\x0b\xff\r\x00d\xff\x10\x01\x00'
+    #print('Expected', exp)
+    exp2 = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x002\xff\r\x00d\xff\x10\x01\x00'
+    exp3 = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00\x10\xff\r\x00d\xff\x10\x01\x00'
+
+    exp_a = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00'
+    exp_b = b'\xff\r\x00d\xff\x10\x01\x00'
+
+    if len(rep) != 20:
+        print('Oh')
+        print('Device responded with', rep)
+        sys.exit(1)
+
+    if rep.startswith(exp_a) and rep.endswith(exp_b):
+        pass
+    else:
+        print('Ooh')
+        print('Device responded with', rep)
+        sys.exit(1)
 
 
-#write
-#ff 05 0b 00
+    # reads
+    # b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n'
+    # b'\x00\x0b\xff\r\x00d\xff\x10\x01\x00'
+    # b'\xff\x05\x01\x01'
 
-print('intensity')
-time.sleep(d)
+    # reads
+    # b'\xff\x01\x00\x00
+    #   \xff\x02\x0b\x02
+    #   \xffx00\x0b
+    #   \xff\r\x00d
+    #   \xff\x10\x01\x00'
+    # b'\xff\x05\x01\x01'
 
-#intensity = b'\xff\x05\x0b\x00' #11ms
-#intensity = b'\xff\x05\x32\x00' #50ms
-#intensity = b'\xff\x05\x14\x00' #20ms
-#intensity = b'\xff\x05\x10\x00' #16ms
 
-# 50: white paper engrave
-# 20: not so white paper engrave
-# 5-10: engrave light balsa wood
+    #write
+    #ff 05 0b 00
 
-burn_time = 5
-intensity = b'\xff\x05' + struct.pack('b', burn_time) + b'\x00' #20ms
+    print('intensity')
+    time.sleep(d)
 
-ser.write(intensity)
+    #intensity = b'\xff\x05\x0b\x00' #11ms
+    #intensity = b'\xff\x05\x32\x00' #50ms
+    #intensity = b'\xff\x05\x14\x00' #20ms
+    #intensity = b'\xff\x05\x10\x00' #16ms
 
-#write
-#ff 6e 01 02 28 02 28 ff 6e 02 00 10 00 0a ff 06 01 01
+    # 50: white paper engrave
+    # 20: not so white paper engrave
+    # 5-10: engrave light balsa wood
 
-print('Write whatever')
-time.sleep(d)
-ser.write(WHATEVER)
+    burn_time = 5
+    intensity = b'\xff\x05' + struct.pack('b', burn_time) + b'\x00' #20ms
+
+    ser.write(intensity)
+
+    #write
+    #ff 6e 01 02 28 02 28 ff 6e 02 00 10 00 0a ff 06 01 01
+
+    print('Write whatever')
+    time.sleep(d)
+    ser.write(WHATEVER)
 
 
 def rectangle_10x10():
@@ -341,7 +342,7 @@ def image():
     time.sleep(d)
     ser.write(data)
 
-
+init()
 #rectangle_10x10()
 #mini_skull()
 image()
