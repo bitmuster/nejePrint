@@ -10,6 +10,17 @@ from PIL import Image
 
 # install pyserial: https://pyserial.readthedocs.io/en/latest/pyserial.html
 
+
+
+# Burn / Engrave
+#
+# python3 printer_new_protocol.py <burn_time> <filename>
+#
+# python3 printer_new_protocol.py 9 Openclipart_Cybernetic_Brain_Line_Art_1538347045_eroded_451.png
+
+# Run Tests:
+# python3 -m unittest test_printer_new_protocol.py
+
 HELLO = b"\xff\x09\x5a\xa5"
 ACK = b'\xff\x05\x01\x01'
 DOIT = b'\xff\x06\x01\x01'
@@ -24,9 +35,17 @@ DIMENSIONS_T = b'\xff\x6e\x02'
 # WTF file with max size 451 : data: 04 38 04 33
 
 # further sniffed codes:
-# ff 04 01    stop (?)
+# ff 04 01 00 stop
 # ff 01 02 00 pause
 # ff 01 01 00 start
+# ff 02 01 00 cut a border ?
+
+# Another sequence
+# ff 6e 01 01 48 00 13
+# ff 6e 02 01 2e 04 33
+# ff 02 02 00
+# then
+# ff 02 01 00 cut a border ?
 
 d = 0.1 # slow down to observe
 
@@ -211,6 +230,25 @@ def image(ser, filename):
     # ff 0b 00 00
     # garbage about the process
 
+
+def send_stop(ser):
+    # works
+    STOP = b'\xff\x04\x01\x00'
+    ser.write(STOP)
+
+def cut_border(ser):
+    # does not work
+    wtf1 = b'\vff\v6e\v01\v01\v48\v00\v13'
+    wtf2 = b'\vff\v6e\v02\v01\v2e\v04\v33'
+
+    ser.write(wtf1)
+    time.sleep(d)
+    ser.write(wtf1)
+    time.sleep(d)
+
+    BORDER = b'\xff\x02\x01\x00'
+    ser.write(BORDER)
+
 if __name__ == '__main__':
 
     # 50: white paper engrave
@@ -226,6 +264,10 @@ if __name__ == '__main__':
     #filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
 
     ser = init_serial()
+
+    #send_stop(ser)
+    #cut_border(ser)
+
     init(ser, burn_time)
     image(ser, filename)
 
