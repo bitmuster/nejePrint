@@ -23,7 +23,7 @@ def init_serial():
     ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1.0)
     return ser
 
-def init(ser):
+def init(ser, burn_time):
 
     print("Read buffer emtty")
     rep=ser.read(30);
@@ -54,12 +54,6 @@ def init(ser):
     print('intensity')
     time.sleep(d)
 
-    # 50: white paper engrave
-    # 20: not so white paper engrave
-    # 5-10: engrave light balsa wood
-
-    burn_time = 5
-
     # Todo Will not work for times larger than 0xff!
     intensity = b'\xff\x05' + struct.pack('b', burn_time) + b'\x00' #20ms
 
@@ -70,14 +64,11 @@ def init(ser):
     ser.write(WHATEVER)
 
 
-def image(ser):
+def image(ser, filename):
 
     print('Write dimensions')
     time.sleep(d)
-    #filename = './test_50x50.bmp'
-    #filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
-    #filename = 'ryanlerch-skull-and-crossbones_250px_border.png'
-    filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
+
     im = Image.open(filename)
     print('Image size:', im.size)
 
@@ -188,9 +179,20 @@ def image(ser):
 
 
 if __name__ == '__main__':
+
+    # 50: white paper engrave
+    # 20: not so white paper engrave
+    # 5-10: engrave light balsa wood
+    burn_time = 5
+
+    #filename = './test_50x50.bmp'
+    #filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
+    #filename = 'ryanlerch-skull-and-crossbones_250px_border.png'
+    filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
+
     ser = init_serial()
-    init(ser)
-    image(ser)
+    init(ser, burn_time)
+    image(ser, filename)
 
 
 
