@@ -1,12 +1,12 @@
 
 
-2020-11-23 **__Project restart**
-
-# New Features
+# Project Restart
 
 * Add exemplary script to drive a printer with the new/different protocol
 * Still a bad hack but started to print images
 
+
+# Original Project Discontinued
 
 2017-06-11 **__Project discontinued due to machine aviability__ Feel free to fork and edit**
 
