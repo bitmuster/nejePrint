@@ -17,6 +17,17 @@ WHATEVER = b'\xff\x6e\x01\x02\x28\x02\x28'
 
 DIMENSIONS_T = b'\xff\x6e\x02'
 
+# According to the manual the printer can work on
+# >>> 0.075*490 = 36.75 mm
+# However the sofware allows a maximum size of 451px
+#
+# WTF file with max size 451 : data: 04 38 04 33
+
+# further sniffed codes:
+# ff 04 01    stop (?)
+# ff 01 02 00 pause
+# ff 01 01 00 start
+
 d = 0.1 # slow down to observe
 
 debug = False
@@ -177,6 +188,9 @@ def image(ser, filename):
     with open(filename + '.img','bw') as f:
         f.write(data)
 
+    # next response ia
+    # ff 0b 00 00
+    # garbage about the process
 
 if __name__ == '__main__':
 
