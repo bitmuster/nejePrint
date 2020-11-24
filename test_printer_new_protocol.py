@@ -57,3 +57,23 @@ class TestNewProtocol(unittest.TestCase):
         s=f'{{0:{w}x}}'
         ar2 = s.format(a)
         self.assertEqual(ar2, ae)
+
+
+
+    def test_derive_dimensions(self):
+
+        width = 7 # 50px -> 56 bit -> 7 byte
+        height = 50
+        exp = b'\xff\x6e\x02' + b'\x00\x38\x00\x32'
+        dim = printer_new_protocol.derive_dimensions(width, height)
+        self.assertEqual(dim, exp)
+
+         #256px     02 38 02 38
+         #255px     02 38 02 37
+         #200px     02 00 02 00
+         #180px     01 54 01 50
+         #451px     04 38 04 33
+
+
+
+

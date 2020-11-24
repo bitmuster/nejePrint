@@ -75,6 +75,16 @@ def init(ser, burn_time):
     time.sleep(d)
     ser.write(WHATEVER)
 
+def derive_dimensions(iw, ih):
+
+    width = struct.pack('>h', iw*8) # should be a multiple of 8
+
+    #height = b'\x00\x0a' # 10 lines
+    height = struct.pack('>h', ih)
+
+    dim = DIMENSIONS_T + width + height
+
+    return dim
 
 def image(ser, filename):
 
@@ -152,13 +162,9 @@ def image(ser, filename):
 
     assert len(data) == math.ceil(iw/8)*ih
 
-    width = height = struct.pack('>h', w*8) # should be a multiple of 8
+    dim = derive_dimensions(w, ih)
 
-    #height = b'\x00\x0a' # 10 lines
-    height = struct.pack('>h', ih)
-
-    dim = DIMENSIONS_T + width + height
-    #print(dim)
+    print(dim)
     ser.write(dim)
 
     print('Write DO IT')
