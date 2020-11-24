@@ -242,8 +242,9 @@ def image():
     print('Write dimensions')
     time.sleep(d)
     #filename = './test_50x50.bmp'
-    filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
+    #filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
     #filename = 'ryanlerch-skull-and-crossbones_250px_border.png'
+    filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
     im = Image.open(filename)
     print('Image size:', im.size)
 
@@ -302,15 +303,16 @@ def image():
         if ((i+1)% iw) ==0:
             val = val << padbits;
             #print('    ', end='')
-            print(f'{val:064x}') # 14 char width
+            print(f'{val:032x}') # 14 char width
             rows.append(val)
             #print(hex(val), end='')
             #print(len(hex(val)))
             # width : math.ceil(v/8)*2
             #data += bytes.fromhex(f'{val:014x}')
             #data += bytes.fromhex(f'{val:0124x}') # for 490px
-            data += bytes.fromhex(f'{val:062x}') # for 245px
+            #data += bytes.fromhex(f'{val:062x}') # for 245px
             #data += bytes.fromhex(f'{val:064x}')  # for 250px
+            data += bytes.fromhex(f'{val:032x}') # for 245px
             val=0
 
     #print(rows)
@@ -352,7 +354,12 @@ def image():
 
     print('Write data')
     time.sleep(d)
+
     ser.write(data)
+
+    with open(filename + '.img','bw') as f:
+        f.write(data)
+
 
 init()
 #rectangle_10x10()
