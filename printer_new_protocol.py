@@ -77,24 +77,29 @@ def init(ser, burn_time):
 
 def derive_dimensions(width_bytes, height):
     # I don't want to know ho invented that algrrithm
+    # Multiples of 100 are in the MSB, the rest ( v-x*msb) in the LSB
+    # But not always
 
-    if width_bytes*8 <= 0x80: # Threshhold unknown somewhere betweeen 0x80 and 180
+    # Interpretation hreshhold unknown somewhere betweeen 0x80 and 180
+    th = 0x80
+
+    if width_bytes*8 <= th:
         x = 0
         y = width_bytes*8
         w = struct.pack('BB', x, y)
     else:
         x = (width_bytes*8) // 100
         y = width_bytes*8 -x*100
-        w = struct.pack('bb', x, y)
+        w = struct.pack('BB', x, y)
 
-    if height <= 0x80: # Threshhold unknown somewhere betweeen 0x80 and 180
+    if height <= th:
         x = 0
         y = height
         h = struct.pack('BB', x, y)
     else:
         x = height // 100
         y = height -x*100
-        h = struct.pack('bb', x, y)
+        h = struct.pack('BB', x, y)
 
     dim = DIMENSIONS_T + w + h
 
@@ -172,7 +177,7 @@ def image(ser, filename):
 
     dim = derive_dimensions(data_width, ih)
 
-    print(dim)
+    #print(dim)
     ser.write(dim)
 
     print('Write DO IT')

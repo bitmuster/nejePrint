@@ -37,7 +37,7 @@ class TestNewProtocol(unittest.TestCase):
             skull = f.read()
 
         calls = [
-            call(b'\xffn\x02\x00\x80\x00}'), # Image dimensions
+            call(b'\xffn\x02\x00\x80\x00}'), # Image dimensions :128, 125
             call(printer_new_protocol.DOIT),
             call(skull)
             ]
@@ -74,7 +74,8 @@ class TestNewProtocol(unittest.TestCase):
             [255, b'\x02\x38\x02\x37'],
             [200, b'\x02\x00\x02\x00'],
             [180, b'\x01\x54\x01\x50'], # 0x0154 : 100 + 0x54 = 100+ 84= 184
-            [451, b'\x04\x38\x04\x33']
+            [451, b'\x04\x38\x04\x33'],
+            [125, b'\x00\x80\x00\x7d'],
             ]
 
         for entry in table:
