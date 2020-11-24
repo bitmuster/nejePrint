@@ -84,8 +84,9 @@ time.sleep(d)
 
 # 50: white paper engrave
 # 20: not so white paper engrave
+# 5-10: engrave light balsa wood
 
-burn_time = 20
+burn_time = 5
 intensity = b'\xff\x05' + struct.pack('b', burn_time) + b'\x00' #20ms
 
 ser.write(intensity)
@@ -239,26 +240,28 @@ def image():
 
     print('Write dimensions')
     time.sleep(d)
-
-    im = Image.open('./test_50x50.bmp')
+    #filename = './test_50x50.bmp'
+    filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
+    im = Image.open(filename)
+    print('Image size:', im.size)
 
     #im = im.resize((512,512), Image.NEAREST)
     #im = im.convert('1') #.transpose(Image.FLIP_TOP_BOTTOM)
     #print(im.tobytes())
     u = im.tobytes()
 
+    iw = im.size[0] # intentional width
+    ih = im.size[1] # intentional height
+
     # the binary image:
     for i in range(len(u)):
         print(u[i], end='')
-        if ((i+1)% 50) ==0:
+        if ((i+1)% iw) ==0:
             print('')
 
     print(im)
 
     #width = b'\x00\x10'  # bit width
-
-    iw = 50 # intentional width
-    ih = 50 # intentional height
 
     if (iw % 8) ==0:
         w = iw//8
@@ -266,7 +269,6 @@ def image():
         w = iw//8+1
 
     print('w', w)
-    assert w == 7
 
     padbits = w*8 - iw
     print('padbits', padbits)
@@ -276,20 +278,24 @@ def image():
     val = 0
     for i in range(len(u)):
         print(u[i], end='')
+        assert  u[i] == 0 or u[i] == 1
         val = val << 1
         val += u[i]
         if ((i+1)% iw) ==0:
             val << padbits;
             print('    ', end='')
-            print(f'{val:014x}') # 14 char width
+            print(f'{val:062x}') # 14 char width
             rows.append(val)
-            print(hex(val))
-            data += bytes.fromhex(f'{val:014x}')
+            #print(hex(val), end='')
+            #print(len(hex(val)))
+            #data += bytes.fromhex(f'{val:014x}')
+            #data += bytes.fromhex(f'{val:0124x}') # for 490px
+            data += bytes.fromhex(f'{val:062x}') # for 245px
             val=0
 
-    print(rows)
-    print(data)
-    print(len(data))
+    #print(rows)
+    #print(data)
+    print('Data Length: ', len(data))
 
     assert len(data) == math.ceil(iw/8)*ih
 
@@ -298,7 +304,7 @@ def image():
     width = height = struct.pack('>h', w*8) # should be a multiple of 8
 
     #height = b'\x00\x0a' # 10 lines
-    height = struct.pack('>h', 50)
+    height = struct.pack('>h', ih)
 
     dim = DIMENSIONS_T + width + height
     print(dim)
