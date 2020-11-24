@@ -243,8 +243,11 @@ def image():
     time.sleep(d)
     #filename = './test_50x50.bmp'
     filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
+    #filename = 'ryanlerch-skull-and-crossbones_250px_border.png'
     im = Image.open(filename)
     print('Image size:', im.size)
+
+    # Seems to be the case when we read from png instead of bmp
     invert = True
 
 
@@ -276,29 +279,38 @@ def image():
     else:
         w = iw//8+1
 
-    print('w', w)
+    print('Data Width', w)
 
     padbits = w*8 - iw
-    print('padbits', padbits)
+
+    print('Image size:', im.size)
+    print('Bits to pad: ', padbits)
+    data_width = math.ceil(iw/8)
+    assert data_width == w # same value different calculation
+    print('Data width: ', data_width, 'Bytes')
+    print('Data width: ', data_width * 2, 'Hex-Chars')
+    print('Will create blob with', data_width*ih , 'Bytes')
 
     rows=[]
     data = b''
     val = 0
     for i in range(len(u)):
-        print(u[i], end='')
+        #print(u[i], end='')
         assert  u[i] == 0 or u[i] == 1
         val = val << 1
         val += u[i]
         if ((i+1)% iw) ==0:
-            val << padbits;
-            print('    ', end='')
-            print(f'{val:062x}') # 14 char width
+            val = val << padbits;
+            #print('    ', end='')
+            print(f'{val:064x}') # 14 char width
             rows.append(val)
             #print(hex(val), end='')
             #print(len(hex(val)))
+            # width : math.ceil(v/8)*2
             #data += bytes.fromhex(f'{val:014x}')
             #data += bytes.fromhex(f'{val:0124x}') # for 490px
             data += bytes.fromhex(f'{val:062x}') # for 245px
+            #data += bytes.fromhex(f'{val:064x}')  # for 250px
             val=0
 
     #print(rows)
