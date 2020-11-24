@@ -26,3 +26,20 @@ class TestNewProtocol(unittest.TestCase):
         printer_new_protocol.init(mock)
         mock.write.assert_has_calls(calls)
 
+    def test_image_skull(self):
+        expect1 = printer_new_protocol.ACK
+        mock= MagicMock()
+        filename = 'ryanlerch-skull-and-crossbones_125px_border.png.img'
+        with open(filename, 'br') as f:
+            skull = f.read()
+
+        calls = [
+            call(b'\xffn\x02\x00\x80\x00}'), # Image dimensions
+            call(printer_new_protocol.DOIT),
+            call(skull)
+            ]
+        mock.read.side_effect = [ expect1 ]
+
+        printer_new_protocol.image(mock)
+
+        mock.write.assert_has_calls(calls)
