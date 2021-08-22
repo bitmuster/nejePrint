@@ -286,16 +286,23 @@ if __name__ == '__main__':
     parser.add_argument('time', help='burn time', type=int)
     parser.add_argument('file', help='filename')
     parser.add_argument('--test', '-t', help='testmode', action='store_true')
+    parser.add_argument('--stop', '-s', help='stop', action='store_true')
     parser.add_argument('--verbose', '-v', action='count')
     args = parser.parse_args()
     burn_time = args.time
     filename = args.file
     testmode = args.test
+    stop = args.stop
         
     # burn time
     # 50: white paper engrave
     # 20: not so white paper engrave
     # 5-10: engrave light balsa wood
+
+    if stop:
+        ser = init_serial()
+        send_stop(ser)
+        sys.exit()
 
     if testmode:
         ser = open('fakeserial.img','bw')
@@ -303,12 +310,7 @@ if __name__ == '__main__':
         ser = init_serial()
         init(ser, burn_time)
     
-    #send_stop(ser)
-    #sys.exit()
-
     #cut_border(ser)
-
-
     
     image(ser, filename, testmode)
 
