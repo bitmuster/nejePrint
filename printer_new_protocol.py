@@ -177,7 +177,7 @@ def image(ser, filenames, testmode):
     data = b''
     val = 0 # The place where we glue our ones and zeros together
     tf = open(filename + '.py','w')
-        
+    bits = 0
         
     for i in range(len(u)):
         # otherwise something is wrong with the picture
@@ -185,26 +185,36 @@ def image(ser, filenames, testmode):
 
         val = val << 1
         val += u[i]
+
+
+
+        # line completed
         if ((i+1)% iw) ==0:
             val = val << padbits;
             
-            rows.append(val)
-
-            if debug:
-                print('hex      ', hex(val)) # leading zeros are missing 
-                s=f'{{0:{data_width}x}}'
-                #s=f'{{0:0102x}}'
-                print('fff      ', s.format(val), len(s.format(val)))
-                print(bytes.fromhex(s.format(val)))
-                print(bytes.fromhex(s.format(val)))
-                tf.write('\'0x' + s.format(val) + '\',\n')
-                
-            
-            s=f'{{0:{data_width}x}}'
+            s=f' {{0:02x}}'
             #s=f'{{0:0102x}}'
-            data += bytes.fromhex(s.format(val))
+            b = struct.pack('B', val)
+            #print( val)
+            #print(b) 
+            print(s.format(val), end='\n')
+            data += b
             val=0
-
+            bits = 0
+        
+        elif ((bits+1)% 8) ==0:
+            s=f' {{0:02x}}'
+            #s=f'{{0:0102x}}'
+            b = struct.pack('B', val)
+            #print( val)
+            #print(b) 
+            print(s.format(val), end='')
+            data += b
+            val=0
+            bits =0
+        else:
+            bits += 1
+            
     print('Data Length is: ', len(data))
 
     assert len(data) == math.ceil(iw/8)*ih
