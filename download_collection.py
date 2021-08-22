@@ -1,4 +1,8 @@
 
+# http://www.neje.club/ says
+# neje.club is the server used by the neje team for software documentation support.
+# All documents are edited by the neje team and copyrighted by neje. Please use it properly.
+
 
 import os
 import sys
@@ -31,3 +35,5 @@ for i in f.readlines():
         l += 1
         #if l== 10:
         #    sys.exit()
+
+

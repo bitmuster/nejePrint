@@ -2,7 +2,7 @@
 
 # Project Restart
 
-* Add exemplary script to drive a printer with the new/different protocol
+* Add exemplary script to drive a printer with the new/different protocol of the DK-8-KZ
 * Still a bad hack but started to print images
 
 
