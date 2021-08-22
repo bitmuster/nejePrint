@@ -8,6 +8,8 @@ import math
 # http://python-pillow.github.io/
 from PIL import Image
 
+# Image needs to be PNG image data, 1-bit colormap, non-interlaced
+
 # install pyserial: https://pyserial.readthedocs.io/en/latest/pyserial.html
 
 # python3 printer_new_protocol.py 10 logo_bw_bold.png
@@ -176,12 +178,12 @@ def image(ser, filenames, testmode):
     rows=[]
     data = b''
     val = 0 # The place where we glue our ones and zeros together
-    tf = open(filename + '.py','w')
     bits = 0
         
     for i in range(len(u)):
         # otherwise something is wrong with the picture
-        assert  u[i] == 0 or u[i] == 1
+        if not (  u[i] == 0 or u[i] == 1 or len(1)!=1 ):
+            raise SystemError('Got %s insteaf of 0 or 1',u)
 
         val = val << 1
         val += u[i]
