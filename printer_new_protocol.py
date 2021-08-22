@@ -179,44 +179,35 @@ def image(ser, filenames, testmode):
     data = b''
     val = 0 # The place where we glue our ones and zeros together
     bits = 0
-        
+
     for i in range(len(u)):
+
         # otherwise something is wrong with the picture
         if not (  u[i] == 0 or u[i] == 1 or len(1)!=1 ):
-            raise SystemError('Got %s insteaf of 0 or 1',u)
+            raise SystemError('Got %s instead of 0 or 1',u)
 
         val = val << 1
         val += u[i]
 
-
-
         # line completed
         if ((i+1)% iw) ==0:
             val = val << padbits;
-            
             s=f' {{0:02x}}'
-            #s=f'{{0:0102x}}'
             b = struct.pack('B', val)
-            #print( val)
-            #print(b) 
             print(s.format(val), end='\n')
             data += b
             val=0
             bits = 0
-        
         elif ((bits+1)% 8) ==0:
             s=f' {{0:02x}}'
-            #s=f'{{0:0102x}}'
             b = struct.pack('B', val)
-            #print( val)
-            #print(b) 
             print(s.format(val), end='')
             data += b
             val=0
             bits =0
         else:
             bits += 1
-            
+
     print('Data Length is: ', len(data))
 
     assert len(data) == math.ceil(iw/8)*ih
@@ -225,7 +216,7 @@ def image(ser, filenames, testmode):
 
     if testmode:
         return
-    
+
     #print(dim)
     ser.write(dim)
 
