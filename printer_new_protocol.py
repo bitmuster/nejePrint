@@ -10,7 +10,7 @@ from PIL import Image
 
 # install pyserial: https://pyserial.readthedocs.io/en/latest/pyserial.html
 
-
+# python3 printer_new_protocol.py 10 logo_bw_bold.png
 
 # Burn / Engrave
 #
@@ -49,7 +49,7 @@ DIMENSIONS_T = b'\xff\x6e\x02'
 
 d = 0.1 # slow down to observe
 
-debug = False
+debug = True
 
 def init_serial():
     ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1.0)
@@ -99,7 +99,7 @@ def derive_dimensions(width_bytes, height):
     # Multiples of 100 are in the MSB, the rest ( v-x*msb) in the LSB
     # But not always
 
-    # Interpretation hreshhold unknown somewhere betweeen 0x80 and 180
+    # Interpretation threshhold unknown somewhere betweeen 0x80 and 180
     th = 0x80
 
     if width_bytes*8 <= th:
@@ -138,6 +138,9 @@ def image(ser, filename):
     #im = im.resize((512,512), Image.NEAREST)
     #im = im.convert('1') #.transpose(Image.FLIP_TOP_BOTTOM)
     #print(im.tobytes())
+    
+    # Our picture
+    # only zeros and ones as b'\x01\x00' !!!
     u = im.tobytes()
 
     iw = im.size[0] # intentional width
@@ -148,7 +151,7 @@ def image(ser, filename):
         u = u.replace(b'\x01',b'\x00')
         u = u.replace(b'\x02',b'\x01')
 
-    if debug:
+    if debug and False:
         # the binary image:
         for i in range(len(u)):
             print(u[i], end='')
@@ -172,10 +175,14 @@ def image(ser, filename):
 
     rows=[]
     data = b''
-    val = 0
-
+    val = 0 # The place where we glue our ones and zeros together
+    tf = open(filename + '.py','w')
+        
+        
     for i in range(len(u)):
+        # otherwise something is wrong with the picture
         assert  u[i] == 0 or u[i] == 1
+
         val = val << 1
         val += u[i]
         if ((i+1)% iw) ==0:
@@ -184,9 +191,17 @@ def image(ser, filename):
             rows.append(val)
 
             if debug:
-                print(hex(val))
-
+                print('hex      ', hex(val)) # leading zeros are missing 
+                s=f'{{0:{data_width}x}}'
+                #s=f'{{0:0102x}}'
+                print('fff      ', s.format(val), len(s.format(val)))
+                print(bytes.fromhex(s.format(val)))
+                print(bytes.fromhex(s.format(val)))
+                tf.write('\'0x' + s.format(val) + '\',\n')
+                
+            
             s=f'{{0:{data_width}x}}'
+            #s=f'{{0:0102x}}'
             data += bytes.fromhex(s.format(val))
             val=0
 
@@ -221,10 +236,10 @@ def image(ser, filename):
     print('Write image data')
     time.sleep(d)
 
-    ser.write(data)
-
     with open(filename + '.img','bw') as f:
         f.write(data)
+
+    ser.write(data)
 
     # next response ia
     # ff 0b 00 00
@@ -266,6 +281,8 @@ if __name__ == '__main__':
     ser = init_serial()
 
     #send_stop(ser)
+    #sys.exit()
+
     #cut_border(ser)
 
     init(ser, burn_time)
