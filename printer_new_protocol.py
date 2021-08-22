@@ -124,7 +124,7 @@ def derive_dimensions(width_bytes, height):
 
     return dim
 
-def image(ser, filename):
+def image(ser, filenames, testmode):
 
     print('Write dimensions')
     time.sleep(d)
@@ -211,6 +211,9 @@ def image(ser, filename):
 
     dim = derive_dimensions(data_width, ih)
 
+    if testmode:
+        return
+    
     #print(dim)
     ser.write(dim)
 
@@ -266,27 +269,38 @@ def cut_border(ser):
 
 if __name__ == '__main__':
 
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('time', help='burn time', type=int)
+    parser.add_argument('file', help='filename')
+    parser.add_argument('--test', '-t', help='testmode', action='store_true')
+    parser.add_argument('--verbose', '-v', action='count')
+    args = parser.parse_args()
+    burn_time = args.time
+    filename = args.file
+    testmode = args.test
+        
+    # burn time
     # 50: white paper engrave
     # 20: not so white paper engrave
     # 5-10: engrave light balsa wood
-    burn_time = int(sys.argv[1])
 
-    #filename = './test_50x50.bmp'
-    filename = sys.argv[2]
-    #filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_eroded.png'
-    #filename = 'Openclipart_Cybernetic_Brain_Line_Art_1538347045_half.png'
-    #filename = 'ryanlerch-skull-and-crossbones_250px_border.png'
-    #filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
-
-    ser = init_serial()
-
+    if testmode:
+        ser = open('fakeserial.img','bw')
+    else:
+        ser = init_serial()
+        init(ser, burn_time)
+    
     #send_stop(ser)
     #sys.exit()
 
     #cut_border(ser)
 
-    init(ser, burn_time)
-    image(ser, filename)
+
+    
+    image(ser, filename, testmode)
 
 
 
