@@ -69,20 +69,25 @@ def init(ser, burn_time):
     rep=ser.read(20);
     #print('Read', len(rep), 'bytes')
 
+
+    # what does it mean?
+    new_response = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x01\x00\xff\r\x00d\xff\x10\x01\x00'
+
     exp_a = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00'
     exp_b = b'\xff\r\x00d\xff\x10\x01\x00'
 
     if len(rep) != 20:
         print('Oh')
         print('Device responded with', rep)
-        sys.exit(1)
+        print('Continuing anyway, lets see if it works ...')
+        #sys.exit(1)
 
     if rep.startswith(exp_a) and rep.endswith(exp_b):
         pass
     else:
         print('Ooh')
-        print('Device responded with', rep)
-        sys.exit(1)
+        print('Continuing anyway, lets see if it still works ...')
+        #sys.exit(1)
 
     print('Write intensity')
     time.sleep(d)
