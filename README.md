@@ -5,6 +5,13 @@
 * Add exemplary script to drive a printer with the new/different protocol of the DK-8-KZ
 * Still a bad hack but started to print images
 
+Burn / Engrave:
+
+    python3 printer_new_protocol.py <burn_time> <filename>
+    python3 printer_new_protocol.py 10 logo_bw_bold.png
+    python3 printer_new_protocol.py 9 Openclipart_Cybernetic_Brain_Line_Art_1538347045_eroded_451.png
+
+
 
 # Original Project Discontinued
 
