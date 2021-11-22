@@ -126,6 +126,10 @@ def derive_dimensions(width_bytes, height):
 
     return dim
 
+def readandprint(ser):
+    rep=ser.read(10);
+    print("Response : ", rep)
+
 def image(ser, filenames, testmode):
 
     print('Write dimensions')
@@ -251,23 +255,45 @@ def image(ser, filenames, testmode):
     # ff 0b 00 00
     # garbage about the process
 
+    readandprint(ser)
 
 def send_stop(ser):
     # works
     STOP = b'\xff\x04\x01\x00'
     ser.write(STOP)
 
+def send_stuff(ser):
+    STUFF = b'\xff\x02\x01\x00'
+    #ser.write(STUFF)
+    #ser.write(DOIT)
+    time.sleep(d)
+
+    #dim = derive_dimensions(10, 10)
+
+    #time.sleep(d)
+    #ser.write(dim)
+    time.sleep(d)
+    #ser.write(DOIT)
+    ser.write(STUFF)
+    readandprint(ser)
+
 def cut_border(ser):
     # does not work
-    wtf1 = b'\vff\v6e\v01\v01\v48\v00\v13'
-    wtf2 = b'\vff\v6e\v02\v01\v2e\v04\v33'
+    # Dimension : amount of lines: 0x1f (31) line length = 0x20
+
+    wtf1 = b'\xff\x6e\x01\x01\x48\x00\x13'
+    wtf2 = b'\xff\x6e\x02\x01\x2e\x04\x33'
+
+    wtf1 = b'\xff\x6e\x01\x02\x1d\x02\x1d'
+    wtf2 = b'\xff\x6e\x02\x00\x20\x00\x1f'
 
     ser.write(wtf1)
     time.sleep(d)
-    ser.write(wtf1)
+    ser.write(wtf2)
     time.sleep(d)
 
-    BORDER = b'\xff\x02\x01\x00'
+    #BORDER = b'\xff\x02\x01\x00'
+    BORDER = b'\xff\x06\x01\x01'
     ser.write(BORDER)
 
 if __name__ == '__main__':
@@ -281,12 +307,15 @@ if __name__ == '__main__':
     parser.add_argument('--test', '-t', help='testmode', action='store_true')
     parser.add_argument('--stop', '-s', help='stop', action='store_true')
     parser.add_argument('--verbose', '-v', action='count')
+    parser.add_argument('--stuff', '-x', action='count')
+
     args = parser.parse_args()
     burn_time = args.time
     filename = args.file
     testmode = args.test
     stop = args.stop
-        
+    stuff = args.stuff
+
     # burn time
     # 50: white paper engrave
     # 20: not so white paper engrave
@@ -297,12 +326,20 @@ if __name__ == '__main__':
         send_stop(ser)
         sys.exit()
 
+    if stuff:
+        ser = init_serial()
+        #init(ser, burn_time)
+        send_stuff(ser)
+        sys.exit()
+
     if testmode:
         ser = open('fakeserial.img','bw')
     else:
         ser = init_serial()
         init(ser, burn_time)
+        pass
     
+    #ser = init_serial()
     #cut_border(ser)
     
     image(ser, filename, testmode)
