@@ -198,14 +198,14 @@ def image(ser, filenames, testmode):
             val = val << padbits;
             s=f' {{0:02x}}'
             b = struct.pack('B', val)
-            print(s.format(val), end='\n')
+            #print(s.format(val), end='\n')
             data += b
             val=0
             bits = 0
         elif ((bits+1)% 8) ==0:
             s=f' {{0:02x}}'
             b = struct.pack('B', val)
-            print(s.format(val), end='')
+            #print(s.format(val), end='')
             data += b
             val=0
             bits =0
