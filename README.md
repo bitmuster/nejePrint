@@ -34,7 +34,8 @@ The burn_time is (probably) given in ms and is material specific. Here are some 
 experiences:
 
 * 1 ms  : Test run
-* 50 ms : White ABS plastic
+* 50 ms : White ABS plastic light engrave
+* 80 ms : White ABS plastic engrave a bit
 * 50 ms : White paper engrave
 * 20 ms : Not so white paper engrave
 * 5-10 ms : Engrave light balsa wood
