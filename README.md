@@ -1,15 +1,48 @@
 
 
-# Project Restart
+# Project Restart for Device DK-8-KZ
 
-* Add exemplary script to drive a printer with the new/different protocol of the DK-8-KZ
-* Still a bad hack but started to print images
+It seems like the Neje DK-8-KZ speaks a different protocoll than in the
+original project. Here we add some magic to be able to use it with scripts
+again.
+
+Why? The original software was so cr*** that it was easier to rewrite it than
+using it. The device seems to use a simple, though cursed protocol on a usb⁻tty.
+
+Overall, I would not recommend to by this device. The hardware is maximal
+cheap and barely functional, the original software is also barely working.
+From the price perspective this was probably the expectation though. I did
+not by it and it basically appeared for me and was free to use, so I made it
+useable.
+
+Changelog
+
+* Add exemplary script to drive a printer with the new/different protocol of
+     the DK-8-KZ [11.2020]
+* Still a bad hack but started to print images [11.2020]
+* Maintenance [01.2026]
 
 Burn / Engrave:
 
     python3 printer_new_protocol.py <burn_time> <filename>
     python3 printer_new_protocol.py 10 logo_bw_bold.png
     python3 printer_new_protocol.py 9 Openclipart_Cybernetic_Brain_Line_Art_1538347045_eroded_451.png
+
+The burn_time is given in ms and is material specific. Here are some of my
+experiences:
+
+* 1 ms  : Test run
+* 50 ms : White ABS plastic
+
+Initialise environment (will differ depending on your OS)
+
+    python3 -m venv venv
+    . venv/bin/activate
+    pip install -r requirements.txt
+
+Testrun (with minimum power)
+
+    python3 printer_new_protocol.py 1 tests/hello.png 
 
 
 
