@@ -1,4 +1,3 @@
-
 import serial
 import time
 import sys
@@ -24,12 +23,12 @@ from PIL import Image
 # python3 -m unittest test_printer_new_protocol.py
 
 HELLO = b"\xff\x09\x5a\xa5"
-ACK = b'\xff\x05\x01\x01'
-DOIT = b'\xff\x06\x01\x01'
-WHATEVER = b'\xff\x6e\x01\x02\x28\x02\x28'
+ACK = b"\xff\x05\x01\x01"
+DOIT = b"\xff\x06\x01\x01"
+WHATEVER = b"\xff\x6e\x01\x02\x28\x02\x28"
 # Grabbed that from the device, unclear what it means
-FINAL_RESPONSE = b'\xff\x0b\x00\x00\xff\x03\x02G\xff\x04'
-DIMENSIONS_T = b'\xff\x6e\x02'
+FINAL_RESPONSE = b"\xff\x0b\x00\x00\xff\x03\x02G\xff\x04"
+DIMENSIONS_T = b"\xff\x6e\x02"
 
 # According to the manual the printer can work on
 # >>> 0.075*490 = 36.75 mm
@@ -50,57 +49,61 @@ DIMENSIONS_T = b'\xff\x6e\x02'
 # then
 # ff 02 01 00 cut a border ?
 
-d = 0.1 # slow down to observe
+d = 0.1  # slow down to observe
 
 debug = True
 
+
 def init_serial():
-    ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1.0)
+    ser = serial.Serial("/dev/ttyUSB0", 57600, timeout=1.0)
     return ser
+
 
 def init(ser, burn_time):
 
     print("Read buffer")
-    rep=ser.read(30);
-    #print(rep)
+    rep = ser.read(30)
+    # print(rep)
 
     print("Say hello to printer")
     ser.write(HELLO)
 
-    rep=ser.read(20);
-    #print('Read', len(rep), 'bytes')
-
+    rep = ser.read(20)
+    # print('Read', len(rep), 'bytes')
 
     # what does it mean?
-    new_response = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x01\x00\xff\r\x00d\xff\x10\x01\x00'
+    new_response = (
+        b"\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x01\x00\xff\r\x00d\xff\x10\x01\x00"
+    )
 
-    exp_a = b'\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00'
-    exp_b = b'\xff\r\x00d\xff\x10\x01\x00'
+    exp_a = b"\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00"
+    exp_b = b"\xff\r\x00d\xff\x10\x01\x00"
 
     if len(rep) != 20:
-        print('Oh')
-        print('Device responded with', rep)
-        print('Continuing anyway, lets see if it works ...')
-        #sys.exit(1)
+        print("Oh")
+        print("Device responded with", rep)
+        print("Continuing anyway, lets see if it works ...")
+        # sys.exit(1)
 
     if rep.startswith(exp_a) and rep.endswith(exp_b):
         pass
     else:
-        print('Ooh')
-        print('Continuing anyway, lets see if it still works ...')
-        #sys.exit(1)
+        print("Ooh")
+        print("Continuing anyway, lets see if it still works ...")
+        # sys.exit(1)
 
-    print('Write intensity')
+    print("Write intensity")
     time.sleep(d)
 
     # Todo Will not work for times larger than 0xff!
-    intensity = b'\xff\x05' + struct.pack('b', burn_time) + b'\x00' #20ms
+    intensity = b"\xff\x05" + struct.pack("b", burn_time) + b"\x00"  # 20ms
 
     ser.write(intensity)
 
-    print('Write \'whatever\'')
+    print("Write 'whatever'")
     time.sleep(d)
     ser.write(WHATEVER)
+
 
 def derive_dimensions(width_bytes, height):
     # I don't want to know ho invented that algrrithm
@@ -110,117 +113,119 @@ def derive_dimensions(width_bytes, height):
     # Interpretation threshhold unknown somewhere betweeen 0x80 and 180
     th = 0x80
 
-    if width_bytes*8 <= th:
+    if width_bytes * 8 <= th:
         x = 0
-        y = width_bytes*8
-        w = struct.pack('BB', x, y)
+        y = width_bytes * 8
+        w = struct.pack("BB", x, y)
     else:
-        x = (width_bytes*8) // 100
-        y = width_bytes*8 -x*100
-        w = struct.pack('BB', x, y)
+        x = (width_bytes * 8) // 100
+        y = width_bytes * 8 - x * 100
+        w = struct.pack("BB", x, y)
 
     if height <= th:
         x = 0
         y = height
-        h = struct.pack('BB', x, y)
+        h = struct.pack("BB", x, y)
     else:
         x = height // 100
-        y = height -x*100
-        h = struct.pack('BB', x, y)
+        y = height - x * 100
+        h = struct.pack("BB", x, y)
 
     dim = DIMENSIONS_T + w + h
 
     return dim
 
+
 def readandprint(ser):
-    rep=ser.read(10);
+    rep = ser.read(10)
     print("Final response : ", rep)
+
 
 def image(ser, filename, testmode):
 
-    print('Write dimensions')
+    print("Write dimensions")
     time.sleep(d)
 
     im = Image.open(filename)
-    print('Image size:', im.size)
+    print("Image size:", im.size)
 
     # Seems to be the case when we read from png instead of bmp
     invert = True
 
-    #im = im.resize((512,512), Image.NEAREST)
-    #im = im.convert('1') #.transpose(Image.FLIP_TOP_BOTTOM)
-    #print(im.tobytes())
-    
+    # im = im.resize((512,512), Image.NEAREST)
+    # im = im.convert('1') #.transpose(Image.FLIP_TOP_BOTTOM)
+    # print(im.tobytes())
+
     # Our picture
     # only zeros and ones as b'\x01\x00' !!!
     u = im.tobytes()
 
-    iw = im.size[0] # intentional width
-    ih = im.size[1] # intentional height
+    iw = im.size[0]  # intentional width
+    ih = im.size[1]  # intentional height
 
     if invert:
-        u = u.replace(b'\x00',b'\x02')
-        u = u.replace(b'\x01',b'\x00')
-        u = u.replace(b'\x02',b'\x01')
+        u = u.replace(b"\x00", b"\x02")
+        u = u.replace(b"\x01", b"\x00")
+        u = u.replace(b"\x02", b"\x01")
 
     if debug and False:
         # the binary image:
         for i in range(len(u)):
-            print(u[i], end='')
-            if ((i+1)% iw) ==0:
-                print('')
+            print(u[i], end="")
+            if ((i + 1) % iw) == 0:
+                print("")
 
-    #print(im)
+    # print(im)
 
-    data_width = math.ceil(iw/8)
+    data_width = math.ceil(iw / 8)
 
-    print('Data Width', data_width)
+    print("Data Width", data_width)
 
-    padbits = data_width*8 - iw
+    padbits = data_width * 8 - iw
 
-    print('Image size:', im.size)
-    print('Bits to pad: ', padbits)
-    
-    print('Data width: ', data_width, 'Bytes')
-    print('Data width: ', data_width * 2, 'Hex-Chars')
-    print('Will create blob with', data_width*ih , 'Bytes')
+    print("Image size:", im.size)
+    print("Bits to pad: ", padbits)
 
-    rows=[]
-    data = b''
-    val = 0 # The place where we glue our ones and zeros together
+    print("Data width: ", data_width, "Bytes")
+    print("Data width: ", data_width * 2, "Hex-Chars")
+    print("Will create blob with", data_width * ih, "Bytes")
+
+    rows = []
+    data = b""
+    val = 0  # The place where we glue our ones and zeros together
     bits = 0
 
     for i in range(len(u)):
 
         # otherwise something is wrong with the picture
-        if not (  u[i] == 0 or u[i] == 1 or len(1)!=1 ):
-            raise SystemError('Got %s instead of 0 or 1',u)
+        if not (u[i] == 0 or u[i] == 1 or len(1) != 1):
+            raise SystemError("Got %s instead of 0 or 1", u)
 
         val = val << 1
         val += u[i]
 
         # line completed
-        if ((i+1)% iw) ==0:
-            val = val << padbits;
-            s=f' {{0:02x}}'
-            b = struct.pack('B', val)
-            #print(s.format(val), end='\n')
+        if ((i + 1) % iw) == 0:
+            val = val << padbits
+            s = f" {{0:02x}}"
+            b = struct.pack("B", val)
+            # print(s.format(val), end='\n')
             data += b
-            val=0
+            val = 0
             bits = 0
-        elif ((bits+1)% 8) ==0:
-            s=f' {{0:02x}}'
-            b = struct.pack('B', val)
-            #print(s.format(val), end='')
+        elif ((bits + 1) % 8) == 0:
+            s = f" {{0:02x}}"
+            b = struct.pack("B", val)
+            # print(s.format(val), end='')
             data += b
-            val=0
-            bits =0
+            val = 0
+            bits = 0
         else:
             bits += 1
 
-    print('Data Length is: ', len(data))
+    print("Data Length is: ", len(data))
 
-    assert len(data) == math.ceil(iw/8)*ih
+    assert len(data) == math.ceil(iw / 8) * ih
 
     dim = derive_dimensions(data_width, ih)
 
@@ -228,32 +233,32 @@ def image(ser, filename, testmode):
         # Just dont write stuff to the hardware and return
         return
 
-    #print(dim)
+    # print(dim)
     ser.write(dim)
 
-    print('Write DO IT')
+    print("Write DO IT")
     time.sleep(d)
     ser.write(DOIT)
 
     print("Read and hope for ACK")
-    rep=ser.read(10);
+    rep = ser.read(10)
 
     if len(rep) != 4:
-        print('Error in response length')
-        print('Device responded with', rep)
+        print("Error in response length")
+        print("Device responded with", rep)
         sys.exit(1)
 
     if rep == ACK:
         pass
     else:
-        print('Error in response')
-        print('Device responded with', rep)
+        print("Error in response")
+        print("Device responded with", rep)
         sys.exit(1)
 
-    print('Write image data')
+    print("Write image data")
     time.sleep(d)
 
-    with open(filename + '.img','bw') as f:
+    with open(filename + ".img", "bw") as f:
         f.write(data)
 
     ser.write(data)
@@ -264,57 +269,60 @@ def image(ser, filename, testmode):
 
     readandprint(ser)
 
+
 def send_stop(ser):
     # works
-    STOP = b'\xff\x04\x01\x00'
+    STOP = b"\xff\x04\x01\x00"
     ser.write(STOP)
 
+
 def send_stuff(ser):
-    STUFF = b'\xff\x02\x01\x00'
-    #ser.write(STUFF)
-    #ser.write(DOIT)
+    STUFF = b"\xff\x02\x01\x00"
+    # ser.write(STUFF)
+    # ser.write(DOIT)
     time.sleep(d)
 
-    #dim = derive_dimensions(10, 10)
+    # dim = derive_dimensions(10, 10)
 
-    #time.sleep(d)
-    #ser.write(dim)
+    # time.sleep(d)
+    # ser.write(dim)
     time.sleep(d)
-    #ser.write(DOIT)
+    # ser.write(DOIT)
     ser.write(STUFF)
     readandprint(ser)
+
 
 def cut_border(ser):
     # does not work
     # Dimension : amount of lines: 0x1f (31) line length = 0x20
 
-    wtf1 = b'\xff\x6e\x01\x01\x48\x00\x13'
-    wtf2 = b'\xff\x6e\x02\x01\x2e\x04\x33'
+    wtf1 = b"\xff\x6e\x01\x01\x48\x00\x13"
+    wtf2 = b"\xff\x6e\x02\x01\x2e\x04\x33"
 
-    wtf1 = b'\xff\x6e\x01\x02\x1d\x02\x1d'
-    wtf2 = b'\xff\x6e\x02\x00\x20\x00\x1f'
+    wtf1 = b"\xff\x6e\x01\x02\x1d\x02\x1d"
+    wtf2 = b"\xff\x6e\x02\x00\x20\x00\x1f"
 
     ser.write(wtf1)
     time.sleep(d)
     ser.write(wtf2)
     time.sleep(d)
 
-    #BORDER = b'\xff\x02\x01\x00'
-    BORDER = b'\xff\x06\x01\x01'
+    # BORDER = b'\xff\x02\x01\x00'
+    BORDER = b"\xff\x06\x01\x01"
     ser.write(BORDER)
 
-if __name__ == '__main__':
 
+if __name__ == "__main__":
 
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('time', help='burn time', type=int)
-    parser.add_argument('file', help='filename')
-    parser.add_argument('--test', '-t', help='testmode', action='store_true')
-    parser.add_argument('--stop', '-s', help='stop', action='store_true')
-    parser.add_argument('--verbose', '-v', action='count')
-    parser.add_argument('--stuff', '-x', action='count')
+    parser.add_argument("time", help="burn time", type=int)
+    parser.add_argument("file", help="filename")
+    parser.add_argument("--test", "-t", help="testmode", action="store_true")
+    parser.add_argument("--stop", "-s", help="stop", action="store_true")
+    parser.add_argument("--verbose", "-v", action="count")
+    parser.add_argument("--stuff", "-x", action="count")
 
     args = parser.parse_args()
     burn_time = args.time
@@ -335,22 +343,18 @@ if __name__ == '__main__':
 
     if stuff:
         ser = init_serial()
-        #init(ser, burn_time)
+        # init(ser, burn_time)
         send_stuff(ser)
         sys.exit()
 
     if testmode:
-        ser = open('fakeserial.img','bw')
+        ser = open("fakeserial.img", "bw")
     else:
         ser = init_serial()
         init(ser, burn_time)
         pass
-    
-    #ser = init_serial()
-    #cut_border(ser)
-    
+
+    # ser = init_serial()
+    # cut_border(ser)
+
     image(ser, filename, testmode)
-
-
-
-
