@@ -8,9 +8,11 @@ again.
 
 Why? The original software was so cr*** that it was easier to rewrite it than
 using it. The device seems to use a simple, though cursed protocol on a usb⁻tty.
+This piece of SW here is cursed well, but made the device useable for me.
 
 Overall, I would not recommend to by this device. The hardware is maximal
-cheap and barely functional, the original software is also barely working.
+cheap and barely functional, the original software is also barely working
+(no wonder they wiped it from existence on their homepage).
 From the price perspective this was probably the expectation though. I did
 not by it and it basically appeared for me and was free to use, so I made it
 useable.
@@ -20,7 +22,7 @@ Changelog
 * Add exemplary script to drive a printer with the new/different protocol of
      the DK-8-KZ [11.2020]
 * Still a bad hack but started to print images [11.2020]
-* Maintenance [01.2026]
+* Maintenance, still a crappy hack [01.2026]
 
 Burn / Engrave:
 
@@ -28,11 +30,16 @@ Burn / Engrave:
     python3 printer_new_protocol.py 10 logo_bw_bold.png
     python3 printer_new_protocol.py 9 Openclipart_Cybernetic_Brain_Line_Art_1538347045_eroded_451.png
 
-The burn_time is given in ms and is material specific. Here are some of my
+The burn_time is (probably) given in ms and is material specific. Here are some of my
 experiences:
 
 * 1 ms  : Test run
 * 50 ms : White ABS plastic
+* 50 ms : White paper engrave
+* 20 ms : Not so white paper engrave
+* 5-10 ms : Engrave light balsa wood
+
+Image needs to be PNG image data, 1-bit colormap, non-interlaced.
 
 Initialise environment (will differ depending on your OS)
 

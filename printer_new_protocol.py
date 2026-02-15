@@ -30,11 +30,18 @@ WHATEVER = b"\xff\x6e\x01\x02\x28\x02\x28"
 FINAL_RESPONSE = b"\xff\x0b\x00\x00\xff\x03\x02G\xff\x04"
 DIMENSIONS_T = b"\xff\x6e\x02"
 
+# what does it mean?
+SOMETHING = b"\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x01\x00\xff\r\x00d\xff\x10\x01\x00"
+
 # According to the manual the printer can work on
 # >>> 0.075*490 = 36.75 mm
 # However the sofware allows a maximum size of 451px
 #
 # WTF file with max size 451 : data: 04 38 04 33
+
+# Means we can really use 33.83 mm from that
+# 100px correspond to 7.5 mm
+# 200px correspond to 15 mm
 
 # further sniffed codes:
 # ff 04 01 00 stop
@@ -55,6 +62,8 @@ debug = True
 
 
 def init_serial():
+    # TODO Make this ajustable
+    print("Trying to connecto to ttyUSB0")
     ser = serial.Serial("/dev/ttyUSB0", 57600, timeout=1.0)
     return ser
 
@@ -70,11 +79,6 @@ def init(ser, burn_time):
 
     rep = ser.read(20)
     # print('Read', len(rep), 'bytes')
-
-    # what does it mean?
-    new_response = (
-        b"\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x01\x00\xff\r\x00d\xff\x10\x01\x00"
-    )
 
     exp_a = b"\xff\x01\x00\x00\xff\x02\x0b\x02\xff\n\x00"
     exp_b = b"\xff\r\x00d\xff\x10\x01\x00"
@@ -106,9 +110,9 @@ def init(ser, burn_time):
 
 
 def derive_dimensions(width_bytes, height):
-    # I don't want to know ho invented that algrrithm
+    # I don't want to know ho invented that algorithm.
     # Multiples of 100 are in the MSB, the rest ( v-x*msb) in the LSB
-    # But not always
+    # but not always
 
     # Interpretation threshhold unknown somewhere betweeen 0x80 and 180
     th = 0x80
@@ -190,7 +194,6 @@ def image(ser, filename, testmode):
     print("Data width: ", data_width * 2, "Hex-Chars")
     print("Will create blob with", data_width * ih, "Bytes")
 
-    rows = []
     data = b""
     val = 0  # The place where we glue our ones and zeros together
     bits = 0
@@ -207,14 +210,14 @@ def image(ser, filename, testmode):
         # line completed
         if ((i + 1) % iw) == 0:
             val = val << padbits
-            s = f" {{0:02x}}"
+            # s = f" {{0:02x}}"
             b = struct.pack("B", val)
             # print(s.format(val), end='\n')
             data += b
             val = 0
             bits = 0
         elif ((bits + 1) % 8) == 0:
-            s = f" {{0:02x}}"
+            # s = f" {{0:02x}}"
             b = struct.pack("B", val)
             # print(s.format(val), end='')
             data += b
@@ -311,7 +314,6 @@ def cut_border(ser):
     BORDER = b"\xff\x06\x01\x01"
     ser.write(BORDER)
 
-
 if __name__ == "__main__":
 
     import argparse
@@ -330,11 +332,6 @@ if __name__ == "__main__":
     testmode = args.test
     stop = args.stop
     stuff = args.stuff
-
-    # burn time
-    # 50: white paper engrave
-    # 20: not so white paper engrave
-    # 5-10: engrave light balsa wood
 
     if stop:
         ser = init_serial()
