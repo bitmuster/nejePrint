@@ -27,7 +27,8 @@ HELLO = b"\xff\x09\x5a\xa5"
 ACK = b'\xff\x05\x01\x01'
 DOIT = b'\xff\x06\x01\x01'
 WHATEVER = b'\xff\x6e\x01\x02\x28\x02\x28'
-
+# Grabbed that from the device, unclear what it means
+FINAL_RESPONSE = b'\xff\x0b\x00\x00\xff\x03\x02G\xff\x04'
 DIMENSIONS_T = b'\xff\x6e\x02'
 
 # According to the manual the printer can work on
@@ -133,9 +134,9 @@ def derive_dimensions(width_bytes, height):
 
 def readandprint(ser):
     rep=ser.read(10);
-    print("Response : ", rep)
+    print("Final response : ", rep)
 
-def image(ser, filenames, testmode):
+def image(ser, filename, testmode):
 
     print('Write dimensions')
     time.sleep(d)
@@ -224,6 +225,7 @@ def image(ser, filenames, testmode):
     dim = derive_dimensions(data_width, ih)
 
     if testmode:
+        # Just dont write stuff to the hardware and return
         return
 
     #print(dim)

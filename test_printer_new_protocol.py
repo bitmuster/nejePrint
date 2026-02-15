@@ -30,8 +30,10 @@ class TestNewProtocol(unittest.TestCase):
 
     def test_image_skull(self):
         expect1 = printer_new_protocol.ACK
+        # Grabbed that from the device, unclear what it means
+        expect2 = b'\xff\x0b\x00\x00\xff\x03\x02G\xff\x04' 
         mock= MagicMock()
-        filename = 'ryanlerch-skull-and-crossbones_125px_border.png'
+        filename = 'pics/ryanlerch-skull-and-crossbones_125px_border.png'
         filename_expect = 'ryanlerch-skull-and-crossbones_125px_border.png.img'
         with open(filename_expect, 'br') as f:
             skull = f.read()
@@ -41,9 +43,9 @@ class TestNewProtocol(unittest.TestCase):
             call(printer_new_protocol.DOIT),
             call(skull)
             ]
-        mock.read.side_effect = [ expect1 ]
+        mock.read.side_effect = [ expect1 , expect2]
 
-        printer_new_protocol.image(mock, filename)
+        printer_new_protocol.image(mock, filename, False)
 
         mock.write.assert_has_calls(calls)
 
