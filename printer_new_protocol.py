@@ -201,7 +201,7 @@ def image(ser, filename, testmode):
     for i in range(len(u)):
 
         # otherwise something is wrong with the picture
-        if not (u[i] == 0 or u[i] == 1 or len(1) != 1):
+        if not (u[i] == 0 or u[i] == 1):
             raise SystemError("Got %s instead of 0 or 1", u)
 
         val = val << 1
